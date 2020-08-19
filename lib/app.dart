@@ -41,6 +41,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<User> _users = [];
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      new GlobalKey<RefreshIndicatorState>();
 
   @override
   Widget build(BuildContext context) {
@@ -51,47 +53,39 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SafeArea(
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                RaisedButton(
-                  child: Text('Load 10'),
-                  onPressed: () => _getJson('assets/generated10.json')
-                      .then((value) => _fetchUsers(value)),
-                ),
-                RaisedButton(
-                  child: Text('Load 100'),
-                  onPressed: () => _getJson('assets/generated100.json')
-                      .then((value) => _fetchUsers(value)),
-                ),
-                RaisedButton(
-                  child: Text('Load 1000'),
-                  onPressed: () => _getJson('assets/generated1000.json')
-                      .then((value) => _fetchUsers(value)),
-                ),
-                RaisedButton(
-                  child: Text('Load 10000'),
-                  onPressed: () => _getJson('assets/generated10000.json')
-                      .then((value) => _fetchUsers(value)),
-                )
-              ],
+            RaisedButton(
+              key: ValueKey('refresh'),
+              child: Text('Refresh'),
+              onPressed: () => _refreshIndicatorKey.currentState.show(),
             ),
             Expanded(
-              child: ListView.builder(
-                itemCount: _users.length,
-                itemBuilder: (context, index) {
-                  var user = _users[index];
-                  return ListTile(
-                    leading: Text('$index'),
-                    title: Text('${user.name} '),
-                  );
-                },
+              child: RefreshIndicator(
+                key: _refreshIndicatorKey,
+                onRefresh: _handleRefresh,
+                child: ListView.builder(
+                  key: ValueKey('list'),
+                  itemCount: _users.length,
+                  itemBuilder: (context, index) {
+                    var user = _users[index];
+                    return ListTile(
+                      key: ValueKey('item_$index'),
+                      leading: Text('$index'),
+                      title: Text('${user.name} '),
+                      subtitle: Text('item_$index'),
+                    );
+                  },
+                ),
               ),
             )
           ],
         ),
       ),
     );
+  }
+
+  Future<Null> _handleRefresh() {
+    return _getJson('assets/generated10000.json')
+        .then((value) => _fetchUsers(value));
   }
 
   Future<String> _getJson(String path) async {
@@ -104,15 +98,15 @@ class _MyHomePageState extends State<MyHomePage> {
         ?.then((value) => setUsers(value));
   }
 
-  List<User> _parseUsers(String jsonStr) {
-    final parsed = json.decode(jsonStr).cast<Map<String, dynamic>>();
-    return parsed.map<User>((json) => User.fromJson(json)).toList();
-  }
-
   setUsers(List<User> value) {
     setState(() {
       _users.clear();
       _users.addAll(value);
     });
   }
+}
+
+List<User> _parseUsers(String jsonStr) {
+  final parsed = json.decode(jsonStr).cast<Map<String, dynamic>>();
+  return parsed.map<User>((json) => User.fromJson(json)).toList();
 }

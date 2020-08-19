@@ -1,33 +1,37 @@
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
+import 'isolates_workaround.dart';
+
 void main() {
   FlutterDriver driver;
-
+  IsolatesWorkaround workaround;
   // Connect to the Flutter driver before running any tests.
   setUpAll(() async {
     driver = await setupAndGetDriver();
+    workaround = IsolatesWorkaround(driver);
+    await workaround.resumeIsolates();
   });
 
   // Close the connection to the driver after the tests have completed.
   tearDownAll(() async {
     if (driver != null) {
-      driver.close();
+      await driver.close();
+      await workaround.tearDown();
     }
   });
 
   test('parsing json', () async {
-    final listFinder = find.byValueKey('long_list');
-    final itemFinder = find.byValueKey('item_50_text');
+    await driver.clearTimeline();
+    final refreshFinder = find.byValueKey('refresh');
+    final itemFinder = find.byValueKey('item_0');
+
+    Health health = await driver.checkHealth();
+    print(health.status);
 
     final timeline = await driver.traceAction(() async {
-      await driver.scrollUntilVisible(
-        listFinder,
-        itemFinder,
-        dyScroll: -300.0,
-      );
-
-      expect(await driver.getText(itemFinder), 'Item 50');
+      await driver.tap(refreshFinder);
+      await driver.waitFor(itemFinder);
     });
 
     final summary = new TimelineSummary.summarize(timeline);
