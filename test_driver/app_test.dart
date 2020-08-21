@@ -22,13 +22,13 @@ void main() {
   });
 
   test('parsing json', () async {
-    await driver.clearTimeline();
     final refreshFinder = find.byValueKey('refresh');
     final itemFinder = find.byValueKey('item_0');
 
     Health health = await driver.checkHealth();
     print(health.status);
 
+    await driver.clearTimeline();
     final timeline = await driver.traceAction(() async {
       await driver.tap(refreshFinder);
       await driver.waitFor(itemFinder);

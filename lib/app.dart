@@ -84,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<Null> _handleRefresh() {
-    return _getJson('assets/generated10000.json')
+    return _getJson('assets/generated100.json')
         .then((value) => _fetchUsers(value));
   }
 

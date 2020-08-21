@@ -14,6 +14,8 @@ https://medium.com/flutter/performance-testing-of-flutter-apps-df7669bb7df7
 
 https://flutter.dev/docs/cookbook/testing/integration/profiling
 
+https://cretezy.com/2020/flutter-fast-json
+
 ## Use
 
 Run
